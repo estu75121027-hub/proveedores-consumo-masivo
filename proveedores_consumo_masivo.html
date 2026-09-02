@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores de Consumo Masivo - Sistema de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --sidebar-w: 280px;
+            --header-h: 70px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
+        
+        /* Sidebar */
+        .sidebar {
+            position:fixed; top:0; left:0; width:var(--sidebar-w); height:100vh;
+            background: linear-gradient(180deg, var(--secondary) 0%, #1e293b 100%);
+            color:#fff; z-index:1000; transition:transform .3s ease;
+            display:flex; flex-direction:column;
+        }
+        .sidebar-header {
+            padding:24px 20px; border-bottom:1px solid rgba(255,255,255,0.08);
+        }
+        .sidebar-header h1 {
+            font-size:18px; font-weight:700; letter-spacing:-0.5px;
+            display:flex; align-items:center; gap:10px;
+        }
+        .sidebar-header h1 i { font-size:24px; color:var(--accent); }
+        .sidebar-header p { font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+        
+        .sidebar-nav { flex:1; padding:12px 0; overflow-y:auto; }
+        .nav-section { padding:8px 20px 4px; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.35); font-weight:600; }
+        .nav-item {
+            display:flex; align-items:center; gap:12px; padding:11px 20px; cursor:pointer;
+            transition:all .2s; border-left:3px solid transparent; color:rgba(255,255,255,0.7);
+            font-size:13.5px; font-weight:500; text-decoration:none;
+        }
+        .nav-item:hover { background:rgba(255,255,255,0.06); color:#fff; }
+        .nav-item.active { background:rgba(37,99,235,0.15); color:#fff; border-left-color:var(--primary-light); }
+        .nav-item i { width:20px; text-align:center; font-size:15px; }
+        
+        /* Header */
+        .header {
+            position:fixed; top:0; left:var(--sidebar-w); right:0; height:var(--header-h);
+            background:rgba(255,255,255,0.85); backdrop-filter:blur(12px);
+            border-bottom:1px solid var(--border); z-index:999;
+            display:flex; align-items:center; justify-content:space-between; padding:0 32px;
+        }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .menu-toggle { display:none; background:none; border:none; font-size:20px; cursor:pointer; color:var(--text); }
+        .page-title { font-size:20px; font-weight:700; }
+        .header-right { display:flex; align-items:center; gap:12px; }
+        .header-btn {
+            width:40px; height:40px; border-radius:10px; border:1px solid var(--border);
+            background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+            transition:all .2s; position:relative; font-size:16px; color:var(--text-light);
+        }
+        .header-btn:hover { border-color:var(--primary); color:var(--primary); }
+        .badge {
+            position:absolute; top:-4px; right:-4px; width:18px; height:18px;
+            background:var(--danger); color:#fff; font-size:10px; font-weight:700;
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+        }
+
+        /* Main */
+        .main { margin-left:var(--sidebar-w); padding:calc(var(--header-h) + 24px) 32px 32px; min-height:100vh; }
+        
+        /* Sections */
+        .section { display:none; }
+        .section.active { display:block; }
+        
+        /* Dashboard Cards */
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:28px; }
+        .stat-card {
+            background:var(--card); border-radius:var(--radius); padding:20px 24px;
+            box-shadow:var(--shadow); border:1px solid var(--border);
+            display:flex; align-items:center; gap:16px; transition:transform .2s;
+        }
+        .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+        .stat-icon {
+            width:48px; height:48px; border-radius:12px; display:flex; align-items:center;
+            justify-content:center; font-size:20px;
+        }
+        .stat-icon.blue { background:#dbeafe; color:var(--primary); }
+        .stat-icon.green { background:#d1fae5; color:var(--success); }
+        .stat-icon.amber { background:#fef3c7; color:var(--warning); }
+        .stat-icon.red { background:#fee2e2; color:var(--danger); }
+        .stat-icon.cyan { background:#cffafe; color:var(--accent); }
+        .stat-info h3 { font-size:26px; font-weight:800; line-height:1; }
+        .stat-info p { font-size:12.5px; color:var(--text-light); margin-top:4px; }
+        
+        /* Cards & Tables */
+        .card {
+            background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+            border:1px solid var(--border); overflow:hidden;
+        }
+        .card-header {
+            padding:16px 24px; border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .card-header h2 { font-size:15px; font-weight:700; }
+        .card-body { padding:20px 24px; }
+        
+        table { width:100%; border-collapse:collapse; }
+        thead th {
+            text-align:left; padding:10px 14px; font-size:11.5px; text-transform:uppercase;
+            letter-spacing:0.5px; color:var(--text-light); font-weight:600;
+            border-bottom:1px solid var(--border); background:#f8fafc;
+        }
+        tbody td { padding:12px 14px; font-size:13.5px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        tbody tr:last-child td { border-bottom:none; }
+        tbody tr:hover { background:#f8fafc; }
+        
+        /* Buttons */
+        .btn {
+            display:inline-flex; align-items:center; gap:8px; padding:9px 18px;
+            border-radius:var(--radius-sm); font-size:13px; font-weight:600;
+            cursor:pointer; border:none; transition:all .2s; text-decoration:none;
+            font-family:inherit;
+        }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:var(--primary-dark); }
+        .btn-success { background:var(--success); color:#fff; }
+        .btn-success:hover { background:#059669; }
+        .btn-warning { background:var(--warning); color:#fff; }
+        .btn-warning:hover { background:#d97706; }
+        .btn-danger { background:var(--danger); color:#fff; }
+        .btn-danger:hover { background:#dc2626; }
+        .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        .btn-sm { padding:6px 12px; font-size:12px; }
+        .btn-icon { width:32px; height:32px; padding:0; justify-content:center; border-radius:8px; }
+        
+        /* Badges */
+        .badge-status {
+            display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px;
+            font-size:11.5px; font-weight:600; gap:5px;
+        }
+        .badge-success { background:#d1fae5; color:#065f46; }
+        .badge-warning { background:#fef3c7; color:#92400e; }
+        .badge-danger { background:#fee2e2; color:#991b1b; }
+        .badge-info { background:#dbeafe; color:#1e40af; }
+        .badge-dot { width:6px; height:6px; border-radius:50%; }
+        .badge-success .badge-dot { background:#10b981; }
+        .badge-warning .badge-dot { background:#f59e0b; }
+        .badge-danger .badge-dot { background:#ef4444; }
+        .badge-info .badge-dot { background:#3b82f6; }
+        
+        /* Forms */
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+        .form-group { display:flex; flex-direction:column; gap:5px; }
+        .form-group label { font-size:12.5px; font-weight:600; color:var(--text-light); }
+        .form-group input, .form-group select, .form-group textarea {
+            padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);
+            font-size:13.5px; font-family:inherit; transition:border-color .2s;
+            background:#fff;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .form-group textarea { resize:vertical; min-height:80px; }
+        
+        /* Modal */
+        .modal-overlay {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+            backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;
+            padding:20px;
+        }
+        .modal-overlay.show { display:flex; }
+        .modal {
+            background:var(--card); border-radius:var(--radius); width:100%; max-width:640px;
+            max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .modal-header {
+            padding:20px 24px; border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .modal-header h2 { font-size:17px; font-weight:700; }
+        .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-light); padding:4px; }
+        .modal-body { padding:24px; }
+        .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+        
+        /* Search & Filters */
+        .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+        .search-box {
+            position:relative; flex:1; min-width:200px;
+        }
+        .search-box input {
+            width:100%; padding:10px 14px 10px 40px; border:1px solid var(--border);
+            border-radius:var(--radius-sm); font-size:13.5px; font-family:inherit;
+        }
+        .search-box input:focus { outline:none; border-color:var(--primary); }
+        .search-box i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-light); font-size:14px; }
+        
+        /* Alerts */
+        .alert {
+            padding:12px 16px; border-radius:var(--radius-sm); display:flex;
+            align-items:center; gap:10px; font-size:13px; margin-bottom:16px;
+        }
+        .alert-warning { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+        .alert-success { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+        .alert-danger { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+        
+        /* Empty state */
+        .empty-state {
+            text-align:center; padding:48px 20px; color:var(--text-light);
+        }
+        .empty-state i { font-size:48px; margin-bottom:12px; opacity:0.3; }
+        .empty-state p { font-size:14px; }
+        
+        /* Progress bar */
+        .progress-bar { height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
+        .progress-fill { height:100%; border-radius:3px; transition:width .3s; }
+        
+        /* Timeline */
+        .timeline-item {
+            display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border);
+        }
+        .timeline-item:last-child { border-bottom:none; }
+        .timeline-dot {
+            width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0;
+        }
+        .timeline-content h4 { font-size:13.5px; font-weight:600; }
+        .timeline-content p { font-size:12.5px; color:var(--text-light); margin-top:2px; }
+        
+        /* Responsive */
+        @media(max-width:1024px) {
+            .sidebar { transform:translateX(-100%); }
+            .sidebar.open { transform:translateX(0); }
+            .header { left:0; }
+            .main { margin-left:0; padding:calc(var(--header-h) + 16px) 16px 16px; }
+            .menu-toggle { display:block; }
+            .stats-grid { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); }
+            .form-grid { grid-template-columns:1fr; }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .section.active { animation:fadeIn .3s ease; }
+        
+        /* Toast */
+        .toast-container { position:fixed; top:80px; right:24px; z-index:3000; display:flex; flex-direction:column; gap:8px; }
+        .toast {
+            background:#fff; border-radius:var(--radius-sm); padding:14px 20px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.12); border-left:4px solid var(--success);
+            display:flex; align-items:center; gap:10px; font-size:13px; font-weight:500;
+            animation:slideIn .3s ease; min-width:280px;
+        }
+        .toast.error { border-left-color:var(--danger); }
+        .toast.warning { border-left-color:var(--warning); }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fas fa-truck-fast"></i> ProveMax</h1>
+            <p>Gestión de Proveedores</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Principal</div>
+            <a class="nav-item active" data-section="dashboard">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <div class="nav-section">Operaciones</div>
+            <a class="nav-item" data-section="productos">
+                <i class="fas fa-boxes-stacked"></i> Productos
+            </a>
+            <a class="nav-item" data-section="clientes">
+                <i class="fas fa-store"></i> Clientes
+            </a>
+            <a class="nav-item" data-section="inventario">
+                <i class="fas fa-warehouse"></i> Inventario
+            </a>
+            <div class="nav-section">Gestión</div>
+            <a class="nav-item" data-section="pedidos">
+                <i class="fas fa-clipboard-list"></i> Pedidos
+            </a>
+            <a class="nav-item" data-section="despachos">
+                <i class="fas fa-truck"></i> Despachos
+            </a>
+            <a class="nav-item" data-section="evidencia">
+                <i class="fas fa-camera"></i> Evidencias
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h2 class="page-title" id="pageTitle">Dashboard</h2>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="Notificaciones" onclick="showSection('inventario')">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </button>
+            <button class="header-btn" title="Buscar" onclick="focusSearch()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Main Content -->
+    <main class="main">
+        
+        <!-- ========== DASHBOARD ========== -->
+        <div class="section active" id="sec-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-boxes-stacked"></i></div>
+                    <div class="stat-info"><h3 id="statProducts">0</h3><p>Productos</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-store"></i></div>
+                    <div class="stat-info"><h3 id="statClients">0</h3><p>Clientes</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="stat-info"><h3 id="statOrders">0</h3><p>Pedidos Activos</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon cyan"><i class="fas fa-truck"></i></div>
+                    <div class="stat-info"><h3 id="statDispatched">0</h3><p>Despachos</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info"><h3 id="statLowStock">0</h3><p>Stock Bajo</p></div>
+                </div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-clock" style="color:var(--primary);margin-right:8px"></i>Pedidos Recientes</h2>
+                    </div>
+                    <div class="card-body" id="recentOrders">
+                        <div class="empty-state"><i class="fas fa-inbox"></i><p>No hay pedidos registrados</p></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line" style="color:var(--success);margin-right:8px"></i>Resumen de Inventario</h2>
+                    </div>
+                    <div class="card-body" id="inventorySummary">
+                        <div class="empty-state"><i class="fas fa-warehouse"></i><p>Sin datos de inventario</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PRODUCTOS ========== -->
+        <div class="section" id="sec-productos">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar productos..." id="searchProducts" oninput="renderProducts()">
+                </div>
+                <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Nuevo Producto</button>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Unidad</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CLIENTES ========== -->
+        <div class="section" id="sec-clientes">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar clientes..." id="searchClients" oninput="renderClients()">
+                </div>
+                <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-plus"></i> Nuevo Cliente</button>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Contacto</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
+                                <th>Pedidos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== INVENTARIO ========== -->
+        <div class="section" id="sec-inventario">
+            <div id="inventoryAlerts"></div>
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar en inventario..." id="searchInventory" oninput="renderInventory()">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Disponibilidad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PEDIDOS ========== -->
+        <div class="section" id="sec-pedidos">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar pedidos..." id="searchOrders" oninput="renderOrders()">
+                </div>
+                <select class="btn btn-outline" id="filterOrderStatus" onchange="renderOrders()" style="padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="despachado">Despachado</option>
+                    <option value="entregado">Entregado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+                <button class="btn btn-primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Nuevo Pedido</button>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#Pedido</th>
+                                <th>Cliente</th>
+                                <th>Productos</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== DESPACHOS ========== -->
+        <div class="section" id="sec-despachos">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar despachos..." id="searchDispatches" oninput="renderDispatches()">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#Despacho</th>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Fecha Salida</th>
+                                <th>Responsable</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dispatchesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== EVIDENCIAS ========== -->
+        <div class="section" id="sec-evidencia">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar evidencias..." id="searchEvidence" oninput="renderEvidence()">
+                </div>
+                <button class="btn btn-primary" onclick="openEvidenceModal()"><i class="fas fa-plus"></i> Registrar Evidencia</button>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding:0">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#Evidencia</th>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evidenceTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========== MODALS ========== -->
+    
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="productModalTitle">Nuevo Producto</h2>
+                <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="productId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="productCode" placeholder="Ej: PROD-001">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="productName" placeholder="Nombre del producto">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <select id="productCategory">
+                            <option value="">Seleccionar...</option>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Lácteos">Lácteos</option>
+                            <option value="Limpieza">Limpieza</option>
+                            <option value="Higiene">Higiene</option>
+                            <option value="Conservas">Conservas</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad de Venta *</label>
+                        <select id="productUnit">
+                            <option value="">Seleccionar...</option>
+                            <option value="Caja">Caja</option>
+                            <option value="Unidad">Unidad</option>
+                            <option value="Paquete">Paquete</option>
+                            <option value="Litro">Litro</option>
+                            <option value="Kilo">Kilo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio ($) *</label>
+                        <input type="number" id="productPrice" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Inicial *</label>
+                        <input type="number" id="productStock" placeholder="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Mínimo</label>
+                        <input type="number" id="productMinStock" placeholder="10" min="0" value="10">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('productModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-check"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal-overlay" id="clientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="clientModalTitle">Nuevo Cliente</h2>
+                <button class="modal-close" onclick="closeModal('clientModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="clientId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre del Negocio *</label>
+                        <input type="text" id="clientName" placeholder="Ej: Bodega Central">
+                    </div>
+                    <div class="form-group">
+                        <label>Persona de Contacto *</label>
+                        <input type="text" id="clientContact" placeholder="Nombre del responsable">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono *</label>
+                        <input type="tel" id="clientPhone" placeholder="Ej: +56 9 1234 5678">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="clientEmail" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Dirección *</label>
+                        <input type="text" id="clientAddress" placeholder="Dirección completa de entrega">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Notas</label>
+                        <textarea id="clientNotes" placeholder="Información adicional sobre el cliente..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('clientModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveClient()"><i class="fas fa-check"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal" style="max-width:720px">
+            <div class="modal-header">
+                <h2 id="orderModalTitle">Nuevo Pedido</h2>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="orderId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Cliente *</label>
+                        <select id="orderClient">
+                            <option value="">Seleccionar cliente...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Entrega</label>
+                        <input type="date" id="orderDate">
+                    </div>
+                </div>
+                <div style="margin-top:16px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <label style="font-size:12.5px;font-weight:600;color:var(--text-light)">Productos del Pedido *</label>
+                        <button class="btn btn-sm btn-outline" onclick="addOrderItem()"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
+                    <div id="orderItems">
+                        <div class="order-item" style="display:grid;grid-template-columns:1fr 120px 100px 40px;gap:8px;margin-bottom:8px;align-items:end">
+                            <select class="order-product" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                                <option value="">Producto...</option>
+                            </select>
+                            <input type="number" class="order-qty" placeholder="Cantidad" min="1" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                            <span class="order-subtotal" style="padding:10px;font-size:13px;color:var(--text-light)">$0.00</span>
+                            <button class="btn btn-icon btn-danger" onclick="removeOrderItem(this)" style="height:40px"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div style="text-align:right;margin-top:12px;font-size:15px;font-weight:700">
+                        Total: <span id="orderTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('orderModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveOrder()"><i class="fas fa-check"></i> Guardar Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Update Modal -->
+    <div class="modal-overlay" id="inventoryModal">
+        <div class="modal" style="max-width:400px">
+            <div class="modal-header">
+                <h2>Ajustar Inventario</h2>
+                <button class="modal-close" onclick="closeModal('inventoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="invProductId">
+                <p style="font-size:13px;color:var(--text-light);margin-bottom:12px">Producto: <strong id="invProductName"></strong></p>
+                <div class="form-group">
+                    <label>Nueva cantidad en stock</label>
+                    <input type="number" id="invNewStock" min="0" placeholder="Ingrese la cantidad">
+                </div>
+                <div class="form-group" style="margin-top:12px">
+                    <label>Stock Mínimo</label>
+                    <input type="number" id="invNewMinStock" min="0" placeholder="Stock mínimo">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('inventoryModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="updateInventory()"><i class="fas fa-check"></i> Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evidence Modal -->
+    <div class="modal-overlay" id="evidenceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Registrar Evidencia</h2>
+                <button class="modal-close" onclick="closeModal('evidenceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Pedido *</label>
+                        <select id="evidenceOrder">
+                            <option value="">Seleccionar pedido...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Evidencia *</label>
+                        <select id="evidenceType">
+                            <option value="">Seleccionar...</option>
+                            <option value="Foto">Foto</option>
+                            <option value="Captura de pantalla">Captura de pantalla</option>
+                            <option value="Comprobante">Comprobante</option>
+                            <option value="Firma digital">Firma digital</option>
+                            <option value="Enlace">Enlace</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Descripción</label>
+                        <textarea id="evidenceDescription" placeholder="Describa la evidencia..."></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>URL o Referencia</label>
+                        <input type="text" id="evidenceUrl" placeholder="Enlace o referencia del archivo">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('evidenceModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveEvidence()"><i class="fas fa-check"></i> Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal-overlay" id="orderDetailModal">
+        <div class="modal" style="max-width:560px">
+            <div class="modal-header">
+                <h2>Detalle del Pedido</h2>
+                <button class="modal-close" onclick="closeModal('orderDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+    // ========== DATA STORE ==========
+    const DB = {
+        products: JSON.parse(localStorage.getItem('pcm_products') || '[]'),
+        clients: JSON.parse(localStorage.getItem('pcm_clients') || '[]'),
+        orders: JSON.parse(localStorage.getItem('pcm_orders') || '[]'),
+        dispatches: JSON.parse(localStorage.getItem('pcm_dispatches') || '[]'),
+        evidence: JSON.parse(localStorage.getItem('pcm_evidence') || '[]'),
+    };
+
+    function saveDB() {
+        localStorage.setItem('pcm_products', JSON.stringify(DB.products));
+        localStorage.setItem('pcm_clients', JSON.stringify(DB.clients));
+        localStorage.setItem('pcm_orders', JSON.stringify(DB.orders));
+        localStorage.setItem('pcm_dispatches', JSON.stringify(DB.dispatches));
+        localStorage.setItem('pcm_evidence', JSON.stringify(DB.evidence));
+    }
+
+    function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+    function fmt$(n) { return '$' + parseFloat(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+    function fmtDate(d) { return d ? new Date(d).toLocaleDateString('es-CL') : '-'; }
+    function today() { return new Date().toISOString().split('T')[0]; }
+
+    // ========== TOAST ==========
+    function toast(msg, type='success') {
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'exclamation-triangle'}"></i> ${msg}`;
+        document.getElementById('toastContainer').appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    // ========== NAVIGATION ==========
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            const sec = item.dataset.section;
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + sec).classList.add('active');
+            document.getElementById('pageTitle').textContent = item.textContent.trim();
+            if (window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
+            refreshAll();
+        });
+    });
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    function focusSearch() {
+        const active = document.querySelector('.section.active');
+        if (!active) return;
+        const search = active.querySelector('.search-box input');
+        if (search) search.focus();
+    }
+    function showSection(s) {
+        navItems.forEach(n => {
+            n.classList.toggle('active', n.dataset.section === s);
+        });
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById('sec-' + s).classList.add('active');
+        document.getElementById('pageTitle').textContent = document.querySelector(`.nav-item[data-section="${s}"]`).textContent.trim();
+        refreshAll();
+    }
+
+    // ========== MODALS ==========
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    // ========== PRODUCTS ==========
+    function openProductModal(p = null) {
+        document.getElementById('productModalTitle').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
+        document.getElementById('productId').value = p ? p.id : '';
+        document.getElementById('productCode').value = p ? p.code : '';
+        document.getElementById('productName').value = p ? p.name : '';
+        document.getElementById('productCategory').value = p ? p.category : '';
+        document.getElementById('productUnit').value = p ? p.unit : '';
+        document.getElementById('productPrice').value = p ? p.price : '';
+        document.getElementById('productStock').value = p ? p.stock : '';
+        document.getElementById('productMinStock').value = p ? p.minStock : 10;
+        openModal('productModal');
+    }
+
+    function saveProduct() {
+        const code = document.getElementById('productCode').value.trim();
+        const name = document.getElementById('productName').value.trim();
+        const category = document.getElementById('productCategory').value;
+        const unit = document.getElementById('productUnit').value;
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const stock = parseInt(document.getElementById('productStock').value);
+        const minStock = parseInt(document.getElementById('productMinStock').value) || 10;
+        const id = document.getElementById('productId').value;
+
+        if (!code || !name || !category || !unit || isNaN(price) || isNaN(stock)) {
+            toast('Complete todos los campos obligatorios', 'error');
+            return;
+        }
+
+        if (id) {
+            const idx = DB.products.findIndex(p => p.id === id);
+            if (idx !== -1) { DB.products[idx] = { ...DB.products[idx], code, name, category, unit, price, stock, minStock }; }
+        } else {
+            DB.products.push({ id: genId(), code, name, category, unit, price, stock, minStock });
+        }
+        saveDB();
+        closeModal('productModal');
+        renderProducts();
+        toast(id ? 'Producto actualizado' : 'Producto registrado');
+    }
+
+    function deleteProduct(id) {
+        if (!confirm('¿Eliminar este producto?')) return;
+        DB.products = DB.products.filter(p => p.id !== id);
+        saveDB();
+        renderProducts();
+        toast('Producto eliminado', 'warning');
+    }
+
+    function renderProducts() {
+        const q = (document.getElementById('searchProducts')?.value || '').toLowerCase();
+        const filtered = DB.products.filter(p =>
+            p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+        );
+        const tbody = document.getElementById('productsTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-box-open"></i><p>No hay productos registrados</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td><strong>${p.code}</strong></td>
+                <td>${p.name}</td>
+                <td>${p.category}</td>
+                <td>${p.unit}</td>
+                <td>${fmt$(p.price)}</td>
+                <td>${p.stock}</td>
+                <td>${p.stock <= 0
+                    ? '<span class="badge-status badge-danger"><span class="badge-dot"></span> Sin stock</span>'
+                    : p.stock <= p.minStock
+                    ? '<span class="badge-status badge-warning"><span class="badge-dot"></span> Stock bajo</span>'
+                    : '<span class="badge-status badge-success"><span class="badge-dot"></span> Disponible</span>'}</td>
+                <td>
+                    <button class="btn btn-icon btn-outline" onclick='openProductModal(${JSON.stringify(p)})' title="Editar"><i class="fas fa-pen"></i></button>
+                    <button class="btn btn-icon btn-danger" onclick="deleteProduct('${p.id}')" title="Eliminar" style="margin-left:4px"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ========== CLIENTS ==========
+    function openClientModal(c = null) {
+        document.getElementById('clientModalTitle').textContent = c ? 'Editar Cliente' : 'Nuevo Cliente';
+        document.getElementById('clientId').value = c ? c.id : '';
+        document.getElementById('clientName').value = c ? c.name : '';
+        document.getElementById('clientContact').value = c ? c.contact : '';
+        document.getElementById('clientPhone').value = c ? c.phone : '';
+        document.getElementById('clientEmail').value = c ? (c.email || '') : '';
+        document.getElementById('clientAddress').value = c ? c.address : '';
+        document.getElementById('clientNotes').value = c ? (c.notes || '') : '';
+        openModal('clientModal');
+    }
+
+    function saveClient() {
+        const name = document.getElementById('clientName').value.trim();
+        const contact = document.getElementById('clientContact').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+        const email = document.getElementById('clientEmail').value.trim();
+        const address = document.getElementById('clientAddress').value.trim();
+        const notes = document.getElementById('clientNotes').value.trim();
+        const id = document.getElementById('clientId').value;
+
+        if (!name || !contact || !phone || !address) {
+            toast('Complete todos los campos obligatorios', 'error');
+            return;
+        }
+        if (id) {
+            const idx = DB.clients.findIndex(c => c.id === id);
+            if (idx !== -1) DB.clients[idx] = { ...DB.clients[idx], name, contact, phone, email, address, notes };
+        } else {
+            DB.clients.push({ id: genId(), name, contact, phone, email, address, notes });
+        }
+        saveDB();
+        closeModal('clientModal');
+        renderClients();
+        toast(id ? 'Cliente actualizado' : 'Cliente registrado');
+    }
+
+    function deleteClient(id) {
+        if (!confirm('¿Eliminar este cliente?')) return;
+        DB.clients = DB.clients.filter(c => c.id !== id);
+        saveDB();
+        renderClients();
+        toast('Cliente eliminado', 'warning');
+    }
+
+    function renderClients() {
+        const q = (document.getElementById('searchClients')?.value || '').toLowerCase();
+        const filtered = DB.clients.filter(c =>
+            c.name.toLowerCase().includes(q) || c.contact.toLowerCase().includes(q)
+        );
+        const tbody = document.getElementById('clientsTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-store"></i><p>No hay clientes registrados</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(c => {
+            const orderCount = DB.orders.filter(o => o.clientId === c.id).length;
+            return `
+            <tr>
+                <td><strong>${c.name}</strong></td>
+                <td>${c.contact}</td>
+                <td>${c.phone}</td>
+                <td>${c.address}</td>
+                <td><span class="badge-status badge-info">${orderCount} pedidos</span></td>
+                <td>
+                    <button class="btn btn-icon btn-outline" onclick='openClientModal(${JSON.stringify(c)})' title="Editar"><i class="fas fa-pen"></i></button>
+                    <button class="btn btn-icon btn-danger" onclick="deleteClient('${c.id}')" title="Eliminar" style="margin-left:4px"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ========== INVENTORY ==========
+    function renderInventory() {
+        const q = (document.getElementById('searchInventory')?.value || '').toLowerCase();
+        const filtered = DB.products.filter(p => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q));
+        
+        // Alerts
+        const lowStockProducts = DB.products.filter(p => p.stock <= p.minStock && p.stock > 0);
+        const outOfStock = DB.products.filter(p => p.stock <= 0);
+        const alertsDiv = document.getElementById('inventoryAlerts');
+        let alerts = '';
+        if (outOfStock.length) {
+            alerts += `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${outOfStock.length} producto(s) sin stock disponible</div>`;
+        }
+        if (lowStockProducts.length) {
+            alerts += `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ${lowStockProducts.length} producto(s) con stock por debajo del mínimo</div>`;
+        }
+        alertsDiv.innerHTML = alerts;
+
+        const tbody = document.getElementById('inventoryTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No hay productos en inventario</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(p => {
+            const pct = p.minStock > 0 ? Math.min(100, (p.stock / (p.minStock * 2)) * 100) : 100;
+            const color = p.stock <= 0 ? '#ef4444' : p.stock <= p.minStock ? '#f59e0b' : '#10b981';
+            return `
+            <tr>
+                <td><strong>${p.name}</strong><br><small style="color:var(--text-light)">${p.code} · ${p.category}</small></td>
+                <td style="font-size:18px;font-weight:700">${p.stock} <small style="font-size:11px;color:var(--text-light)">${p.unit}</small></td>
+                <td>${p.minStock} ${p.unit}</td>
+                <td style="min-width:150px">
+                    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+                    <small style="color:var(--text-light)">${pct.toFixed(0)}%</small>
+                </td>
+                <td>${p.stock <= 0
+                    ? '<span class="badge-status badge-danger"><span class="badge-dot"></span> Sin stock</span>'
+                    : p.stock <= p.minStock
+                    ? '<span class="badge-status badge-warning"><span class="badge-dot"></span> Stock bajo</span>'
+                    : '<span class="badge-status badge-success"><span class="badge-dot"></span> OK</span>'}</td>
+                <td><button class="btn btn-sm btn-outline" onclick="openInventoryModal('${p.id}')"><i class="fas fa-edit"></i> Ajustar</button></td>
+            </tr>`;
+        }).join('');
+
+        // Update alert badge
+        const totalAlerts = lowStockProducts.length + outOfStock.length;
+        document.getElementById('alertBadge').textContent = totalAlerts;
+        document.getElementById('alertBadge').style.display = totalAlerts > 0 ? 'flex' : 'none';
+    }
+
+    function openInventoryModal(id) {
+        const p = DB.products.find(pr => pr.id === id);
+        if (!p) return;
+        document.getElementById('invProductId').value = p.id;
+        document.getElementById('invProductName').textContent = p.name;
+        document.getElementById('invNewStock').value = p.stock;
+        document.getElementById('invNewMinStock').value = p.minStock;
+        openModal('inventoryModal');
+    }
+
+    function updateInventory() {
+        const id = document.getElementById('invProductId').value;
+        const stock = parseInt(document.getElementById('invNewStock').value);
+        const minStock = parseInt(document.getElementById('invNewMinStock').value);
+        const idx = DB.products.findIndex(p => p.id === id);
+        if (idx === -1 || isNaN(stock)) { toast('Datos inválidos', 'error'); return; }
+        DB.products[idx].stock = stock;
+        DB.products[idx].minStock = minStock || 10;
+        saveDB();
+        closeModal('inventoryModal');
+        renderInventory();
+        toast('Inventario actualizado');
+    }
+
+    // ========== ORDERS ==========
+    function populateOrderClient() {
+        const sel = document.getElementById('orderClient');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Seleccionar cliente...</option>' +
+            DB.clients.map(c => `<option value="${c.id}" ${c.id===current?'selected':''}>${c.name}</option>`).join('');
+    }
+
+    function populateOrderProducts() {
+        document.querySelectorAll('.order-product').forEach(sel => {
+            const current = sel.value;
+            sel.innerHTML = '<option value="">Producto...</option>' +
+                DB.products.filter(p => p.stock > 0).map(p =>
+                    `<option value="${p.id}" data-price="${p.price}" ${p.id===current?'selected':''}>${p.name} (${fmt$(p.price)} / ${p.unit}) - Stock: ${p.stock}</option>`
+                ).join('');
+        });
+    }
+
+    function openOrderModal(o = null) {
+        document.getElementById('orderModalTitle').textContent = o ? 'Editar Pedido' : 'Nuevo Pedido';
+        document.getElementById('orderId').value = o ? o.id : '';
+        populateOrderClient();
+        document.getElementById('orderDate').value = o ? o.deliveryDate : '';
+        
+        const itemsDiv = document.getElementById('orderItems');
+        if (o && o.items && o.items.length) {
+            itemsDiv.innerHTML = '';
+            o.items.forEach(item => {
+                addOrderItem(item.productId, item.qty);
+            });
+        } else {
+            itemsDiv.innerHTML = '';
+            addOrderItem();
+        }
+        populateOrderProducts();
+        updateOrderTotal();
+        openModal('orderModal');
+    }
+
+    function addOrderItem(productId = '', qty = '') {
+        const div = document.getElementById('orderItems');
+        const item = document.createElement('div');
+        item.className = 'order-item';
+        item.style.cssText = 'display:grid;grid-template-columns:1fr 120px 100px 40px;gap:8px;margin-bottom:8px;align-items:end';
+        item.innerHTML = `
+            <select class="order-product" onchange="updateOrderItemSubtotal(this);updateOrderTotal()" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                <option value="">Producto...</option>
+                ${DB.products.filter(p=>p.stock>0).map(p=>`<option value="${p.id}" data-price="${p.price}" ${p.id===productId?'selected':''}>${p.name} - Stock: ${p.stock}</option>`).join('')}
+            </select>
+            <input type="number" class="order-qty" value="${qty}" placeholder="Cantidad" min="1" onchange="updateOrderItemSubtotal(this.parentElement.querySelector('.order-product'));updateOrderTotal()" oninput="updateOrderItemSubtotal(this.parentElement.querySelector('.order-product'));updateOrderTotal()" style="padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+            <span class="order-subtotal" style="padding:10px;font-size:13px;color:var(--text-light)">$0.00</span>
+            <button class="btn btn-icon btn-danger" onclick="removeOrderItem(this)" style="height:40px"><i class="fas fa-times"></i></button>
+        `;
+        div.appendChild(item);
+        updateOrderItemSubtotal(item.querySelector('.order-product'));
+    }
+
+    function removeOrderItem(btn) {
+        const items = document.querySelectorAll('.order-item');
+        if (items.length <= 1) { toast('Debe haber al menos un producto', 'warning'); return; }
+        btn.closest('.order-item').remove();
+        updateOrderTotal();
+    }
+
+    function updateOrderItemSubtotal(sel) {
+        const item = sel.closest('.order-item');
+        const opt = sel.options[sel.selectedIndex];
+        const price = opt.dataset.price ? parseFloat(opt.dataset.price) : 0;
+        const qty = parseInt(item.querySelector('.order-qty').value) || 0;
+        item.querySelector('.order-subtotal').textContent = fmt$(price * qty);
+    }
+
+    function updateOrderTotal() {
+        let total = 0;
+        document.querySelectorAll('.order-item').forEach(item => {
+            const sel = item.querySelector('.order-product');
+            const opt = sel.options[sel.selectedIndex];
+            const price = opt?.dataset?.price ? parseFloat(opt.dataset.price) : 0;
+            const qty = parseInt(item.querySelector('.order-qty').value) || 0;
+            total += price * qty;
+        });
+        document.getElementById('orderTotal').textContent = fmt$(total);
+    }
+
+    function saveOrder() {
+        const clientId = document.getElementById('orderClient').value;
+        const deliveryDate = document.getElementById('orderDate').value;
+        const id = document.getElementById('orderId').value;
+
+        if (!clientId) { toast('Seleccione un cliente', 'error'); return; }
+
+        const items = [];
+        let valid = true;
+        document.querySelectorAll('.order-item').forEach(item => {
+            const productId = item.querySelector('.order-product').value;
+            const qty = parseInt(item.querySelector('.order-qty').value) || 0;
+            if (productId && qty > 0) {
+                const product = DB.products.find(p => p.id === productId);
+                if (product && qty > product.stock) {
+                    toast(`Stock insuficiente para "${product.name}" (disponible: ${product.stock})`, 'error');
+                    valid = false;
+                    return;
+                }
+                items.push({ productId, qty, price: product.price, name: product.name });
+            }
+        });
+
+        if (!valid || !items.length) { toast('Agregue al menos un producto válido', 'error'); return; }
+
+        const total = items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const client = DB.clients.find(c => c.id === clientId);
+
+        if (id) {
+            const idx = DB.orders.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                DB.orders[idx] = { ...DB.orders[idx], clientId, clientName: client.name, items, total, deliveryDate };
+            }
+        } else {
+            const orderNum = 'PED-' + String(DB.orders.length + 1).padStart(4, '0');
+            DB.orders.push({
+                id: genId(), orderNum, clientId, clientName: client.name,
+                items, total, deliveryDate, status: 'pendiente', createdAt: today()
+            });
+        }
+
+        saveDB();
+        closeModal('orderModal');
+        renderOrders();
+        toast(id ? 'Pedido actualizado' : 'Pedido registrado');
+    }
+
+    function updateOrderStatus(id, status) {
+        const idx = DB.orders.findIndex(o => o.id === id);
+        if (idx === -1) return;
+        DB.orders[idx].status = status;
+        
+        if (status === 'entregado') {
+            // Update inventory
+            DB.orders[idx].items.forEach(item => {
+                const pIdx = DB.products.findIndex(p => p.id === item.productId);
+                if (pIdx !== -1) DB.products[pIdx].stock = Math.max(0, DB.products[pIdx].stock - item.qty);
+            });
+        }
+        
+        saveDB();
+        renderOrders();
+        toast(`Pedido ${status}`);
+    }
+
+    function viewOrder(id) {
+        const o = DB.orders.find(ord => ord.id === id);
+        if (!o) return;
+        const html = `
+            <div style="margin-bottom:16px">
+                <p><strong>Pedido:</strong> ${o.orderNum}</p>
+                <p><strong>Cliente:</strong> ${o.clientName}</p>
+                <p><strong>Fecha:</strong> ${fmtDate(o.createdAt)}</p>
+                <p><strong>Entrega:</strong> ${fmtDate(o.deliveryDate)}</p>
+                <p><strong>Estado:</strong> <span class="badge-status badge-${getStatusClass(o.status)}">${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span></p>
+            </div>
+            <table style="width:100%">
+                <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                    ${o.items.map(i => `<tr><td>${i.name}</td><td>${i.qty}</td><td>${fmt$(i.price)}</td><td>${fmt$(i.price*i.qty)}</td></tr>`).join('')}
+                </tbody>
+            </table>
+            <div style="text-align:right;margin-top:12px;font-size:16px;font-weight:700">Total: ${fmt$(o.total)}</div>
+        `;
+        document.getElementById('orderDetailContent').innerHTML = html;
+        openModal('orderDetailModal');
+    }
+
+    function deleteOrder(id) {
+        if (!confirm('¿Eliminar este pedido?')) return;
+        DB.orders = DB.orders.filter(o => o.id !== id);
+        saveDB();
+        renderOrders();
+        toast('Pedido eliminado', 'warning');
+    }
+
+    function getStatusClass(s) {
+        return { pendiente:'warning', aprobado:'info', despachado:'info', entregado:'success', cancelado:'danger' }[s] || 'warning';
+    }
+
+    function renderOrders() {
+        const q = (document.getElementById('searchOrders')?.value || '').toLowerCase();
+        const filter = document.getElementById('filterOrderStatus')?.value || '';
+        const filtered = DB.orders.filter(o =>
+            (o.orderNum.toLowerCase().includes(q) || o.clientName.toLowerCase().includes(q)) &&
+            (!filter || o.status === filter)
+        );
+        const tbody = document.getElementById('ordersTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-clipboard"></i><p>No hay pedidos registrados</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(o => `
+            <tr>
+                <td><strong>${o.orderNum}</strong></td>
+                <td>${o.clientName}</td>
+                <td>${o.items.length} producto(s)</td>
+                <td><strong>${fmt$(o.total)}</strong></td>
+                <td>${fmtDate(o.createdAt)}</td>
+                <td><span class="badge-status badge-${getStatusClass(o.status)}"><span class="badge-dot"></span> ${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span></td>
+                <td>
+                    <button class="btn btn-icon btn-outline" onclick="viewOrder('${o.id}')" title="Ver"><i class="fas fa-eye"></i></button>
+                    ${o.status === 'pendiente' ? `<button class="btn btn-icon btn-success" onclick="updateOrderStatus('${o.id}','aprobado')" title="Aprobar" style="margin-left:4px"><i class="fas fa-check"></i></button>` : ''}
+                    ${o.status === 'aprobado' ? `<button class="btn btn-icon btn-primary" onclick="createDispatchFromOrder('${o.id}')" title="Despachar" style="margin-left:4px"><i class="fas fa-truck"></i></button>` : ''}
+                    ${o.status === 'despachado' ? `<button class="btn btn-icon btn-success" onclick="confirmDelivery('${o.id}')" title="Confirmar Entrega" style="margin-left:4px"><i class="fas fa-check-double"></i></button>` : ''}
+                    <button class="btn btn-icon btn-danger" onclick="deleteOrder('${o.id}')" title="Eliminar" style="margin-left:4px"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ========== DISPATCHES ==========
+    function createDispatchFromOrder(orderId) {
+        const o = DB.orders.find(ord => ord.id === orderId);
+        if (!o) return;
+        const dispatchNum = 'DSP-' + String(DB.dispatches.length + 1).padStart(4, '0');
+        DB.dispatches.push({
+            id: genId(), dispatchNum, orderId: o.id, orderNum: o.orderNum,
+            clientName: o.clientName, clientId: o.clientId,
+            dispatchDate: today(), responsible: 'Sistema', status: 'en_ruta', items: o.items
+        });
+        // Update order status
+        const idx = DB.orders.findIndex(ord => ord.id === orderId);
+        if (idx !== -1) DB.orders[idx].status = 'despachado';
+        saveDB();
+        renderDispatches();
+        renderOrders();
+        toast('Despacho creado');
+    }
+
+    function confirmDispatch(id) {
+        const idx = DB.dispatches.findIndex(d => d.id === id);
+        if (idx === -1) return;
+        DB.dispatches[idx].status = 'entregado';
+        // Update order
+        const orderIdx = DB.orders.findIndex(o => o.id === DB.dispatches[idx].orderId);
+        if (orderIdx !== -1) {
+            DB.orders[orderIdx].status = 'entregado';
+            // Deduct inventory
+            DB.orders[orderIdx].items.forEach(item => {
+                const pIdx = DB.products.findIndex(p => p.id === item.productId);
+                if (pIdx !== -1) DB.products[pIdx].stock = Math.max(0, DB.products[pIdx].stock - item.qty);
+            });
+        }
+        saveDB();
+        renderDispatches();
+        renderOrders();
+        toast('Despacho confirmado como entregado');
+    }
+
+    function deleteDispatch(id) {
+        if (!confirm('¿Eliminar este despacho?')) return;
+        DB.dispatches = DB.dispatches.filter(d => d.id !== id);
+        saveDB();
+        renderDispatches();
+        toast('Despacho eliminado', 'warning');
+    }
+
+    function renderDispatches() {
+        const q = (document.getElementById('searchDispatches')?.value || '').toLowerCase();
+        const filtered = DB.dispatches.filter(d =>
+            d.dispatchNum.toLowerCase().includes(q) || d.clientName.toLowerCase().includes(q) || d.orderNum.toLowerCase().includes(q)
+        );
+        const tbody = document.getElementById('dispatchesTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-truck"></i><p>No hay despachos registrados</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(d => `
+            <tr>
+                <td><strong>${d.dispatchNum}</strong></td>
+                <td>${d.orderNum}</td>
+                <td>${d.clientName}</td>
+                <td>${fmtDate(d.dispatchDate)}</td>
+                <td>${d.responsible}</td>
+                <td><span class="badge-status badge-${d.status==='entregado'?'success':d.status==='en_ruta'?'info':'warning'}"><span class="badge-dot"></span> ${d.status==='en_ruta'?'En ruta':d.status==='entregado'?'Entregado':d.status}</span></td>
+                <td>
+                    ${d.status !== 'entregado' ? `<button class="btn btn-sm btn-success" onclick="confirmDispatch('${d.id}')"><i class="fas fa-check"></i> Confirmar</button>` : ''}
+                    <button class="btn btn-icon btn-danger" onclick="deleteDispatch('${d.id}')" title="Eliminar" style="margin-left:4px"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ========== EVIDENCE ==========
+    function openEvidenceModal() {
+        const sel = document.getElementById('evidenceOrder');
+        sel.innerHTML = '<option value="">Seleccionar pedido...</option>' +
+            DB.orders.filter(o => o.status === 'despachado' || o.status === 'entregado').map(o =>
+                `<option value="${o.id}">${o.orderNum} - ${o.clientName}</option>`
+            ).join('');
+        document.getElementById('evidenceType').value = '';
+        document.getElementById('evidenceDescription').value = '';
+        document.getElementById('evidenceUrl').value = '';
+        openModal('evidenceModal');
+    }
+
+    function saveEvidence() {
+        const orderId = document.getElementById('evidenceOrder').value;
+        const type = document.getElementById('evidenceType').value;
+        const description = document.getElementById('evidenceDescription').value.trim();
+        const url = document.getElementById('evidenceUrl').value.trim();
+
+        if (!orderId || !type) { toast('Complete los campos obligatorios', 'error'); return; }
+
+        const order = DB.orders.find(o => o.id === orderId);
+        const evNum = 'EVD-' + String(DB.evidence.length + 1).padStart(4, '0');
+        DB.evidence.push({
+            id: genId(), evNum, orderId, orderNum: order.orderNum,
+            clientName: order.clientName, type, description, url,
+            createdAt: today(), status: 'registrada'
+        });
+        saveDB();
+        closeModal('evidenceModal');
+        renderEvidence();
+        toast('Evidencia registrada');
+    }
+
+    function deleteEvidence(id) {
+        if (!confirm('¿Eliminar esta evidencia?')) return;
+        DB.evidence = DB.evidence.filter(e => e.id !== id);
+        saveDB();
+        renderEvidence();
+        toast('Evidencia eliminada', 'warning');
+    }
+
+    function renderEvidence() {
+        const q = (document.getElementById('searchEvidence')?.value || '').toLowerCase();
+        const filtered = DB.evidence.filter(e =>
+            e.evNum.toLowerCase().includes(q) || e.clientName.toLowerCase().includes(q) || e.type.toLowerCase().includes(q)
+        );
+        const tbody = document.getElementById('evidenceTable');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-camera"></i><p>No hay evidencias registradas</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(e => `
+            <tr>
+                <td><strong>${e.evNum}</strong></td>
+                <td>${e.orderNum}</td>
+                <td>${e.clientName}</td>
+                <td>${e.type}</td>
+                <td>${fmtDate(e.createdAt)}</td>
+                <td><span class="badge-status badge-success"><span class="badge-dot"></span> Registrada</span></td>
+                <td>
+                    <button class="btn btn-icon btn-danger" onclick="deleteEvidence('${e.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ========== DASHBOARD ==========
+    function renderDashboard() {
+        document.getElementById('statProducts').textContent = DB.products.length;
+        document.getElementById('statClients').textContent = DB.clients.length;
+        document.getElementById('statOrders').textContent = DB.orders.filter(o => o.status !== 'entregado' && o.status !== 'cancelado').length;
+        document.getElementById('statDispatched').textContent = DB.dispatches.length;
+        document.getElementById('statLowStock').textContent = DB.products.filter(p => p.stock <= p.minStock).length;
+
+        // Recent Orders
+        const recent = [...DB.orders].reverse().slice(0, 5);
+        const recentDiv = document.getElementById('recentOrders');
+        if (!recent.length) {
+            recentDiv.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No hay pedidos registrados</p></div>';
+        } else {
+            recentDiv.innerHTML = recent.map(o => `
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:var(--${o.status==='entregado'?'success':o.status==='cancelado'?'danger':o.status==='despachado'?'accent':o.status==='aprobado'?'primary':'warning'})"></div>
+                    <div class="timeline-content">
+                        <h4>${o.orderNum} — ${o.clientName}</h4>
+                        <p>${fmt$(o.total)} · ${fmtDate(o.createdAt)} · <span class="badge-status badge-${getStatusClass(o.status)}" style="font-size:10px">${o.status}</span></p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Inventory Summary
+        const invDiv = document.getElementById('inventorySummary');
+        const topProducts = [...DB.products].sort((a,b) => a.stock - b.stock).slice(0, 5);
+        if (!topProducts.length) {
+            invDiv.innerHTML = '<div class="empty-state"><i class="fas fa-warehouse"></i><p>Sin datos de inventario</p></div>';
+        } else {
+            invDiv.innerHTML = topProducts.map(p => {
+                const pct = p.minStock > 0 ? Math.min(100, (p.stock / (p.minStock * 2)) * 100) : 100;
+                const color = p.stock <= 0 ? '#ef4444' : p.stock <= p.minStock ? '#f59e0b' : '#10b981';
+                return `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+                        <div>
+                            <div style="font-size:13px;font-weight:600">${p.name}</div>
+                            <small style="color:var(--text-light)">${p.code}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-weight:700;color:${color}">${p.stock} ${p.unit}</div>
+                            <div class="progress-bar" style="width:80px;margin-top:4px"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // ========== REFRESH ALL ==========
+    function refreshAll() {
+        renderDashboard();
+        renderProducts();
+        renderClients();
+        renderInventory();
+        renderOrders();
+        renderDispatches();
+        renderEvidence();
+    }
+
+    // ========== DEMO DATA ==========
+    function loadDemoData() {
+        if (DB.products.length > 0 || DB.clients.length > 0) return;
+        
+        DB.products = [
+            { id:'p1', code:'PROD-001', name:'Arroz Premium 1kg', category:'Alimentos', unit:'Caja', price:25.50, stock:150, minStock:30 },
+            { id:'p2', code:'PROD-002', name:'Aceite Vegetal 1L', category:'Alimentos', unit:'Caja', price:18.90, stock:80, minStock:20 },
+            { id:'p3', code:'PROD-003', name:'Agua Mineral 500ml x12', category:'Bebidas', unit:'Caja', price:12.00, stock:200, minStock:40 },
+            { id:'p4', code:'PROD-004', name:'Cola 2L x6', category:'Bebidas', unit:'Caja', price:22.00, stock:15, minStock:25 },
+            { id:'p5', code:'PROD-005', name:'Atún en Lata 170g x24', category:'Conservas', unit:'Caja', price:38.50, stock:60, minStock:15 },
+            { id:'p6', code:'PROD-006', name:'Leche UHT 1L x12', category:'Lácteos', unit:'Caja', price:28.00, stock:8, minStock:20 },
+            { id:'p7', code:'PROD-007', name:'Detergente 3L', category:'Limpieza', unit:'Unidad', price:15.50, stock:90, minStock:10 },
+            { id:'p8', code:'PROD-008', name:'Jabón en Barra x24', category:'Higiene', unit:'Caja', price:14.00, stock:0, minStock:20 },
+        ];
+        DB.clients = [
+            { id:'c1', name:'Bodega Central', contact:'María López', phone:'+56 9 1234 5678', email:'maria@bodegacentral.cl', address:'Av. Principal 123, Santiago', notes:'Entregar entre 9:00 y 12:00' },
+            { id:'c2', name:'Minimarket Sol', contact:'Pedro Gómez', phone:'+56 9 8765 4321', email:'pedro@minisol.cl', address:'Calle Norte 456, Valparaíso', notes:'' },
+            { id:'c3', name:'SuperBodega Express', contact:'Ana Ruiz', phone:'+56 9 5555 1234', email:'ana@superbodega.cl', address:'Pasaje Sur 789, Concepción', notes:'Pedido mínimo $100' },
+        ];
+        saveDB();
+    }
+
+    // ========== INIT ==========
+    loadDemoData();
+    refreshAll();
+    </script>
+</body>
+</html>
